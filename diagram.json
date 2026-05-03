@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "author": "Fabio Henrique Cabrini",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 4.7, "left": 4.6, "attrs": {} },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": 47.7,
+      "left": -159.1,
+      "rotate": 90,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-rgb-led",
+      "id": "rgb1",
+      "top": 32.8,
+      "left": -363.7,
+      "attrs": { "common": "cathode" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": -14.4,
+      "left": -355.75,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": -14.4,
+      "left": -394.15,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": -14.4,
+      "left": -374.95,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    { "type": "wokwi-dht22", "id": "dht1", "top": 9.9, "left": -187.8, "attrs": {} },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 12,
+      "left": -286.2,
+      "attrs": { "volume": "0.1" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "ldr1:AO", "esp:D34", "green", [ "v28.8", "h77.5", "v-134.2" ] ],
+    [ "ldr1:VCC", "esp:3V3", "red", [ "v57.6", "h182.4", "v-57.6" ] ],
+    [ "ldr1:GND", "esp:GND.1", "black", [ "v67.2", "h202", "v-76.7" ] ],
+    [ "rgb1:R", "r2:2", "red", [ "v0", "h-9.6" ] ],
+    [ "rgb1:G", "r3:2", "green", [ "v9.6", "h20.5", "v-48", "h-28.8" ] ],
+    [ "rgb1:B", "r1:2", "blue", [ "v0", "h20.8", "v-48", "h-19.2" ] ],
+    [ "r2:1", "esp:D25", "red", [ "h345.6", "v134.4" ] ],
+    [ "r3:1", "esp:D26", "green", [ "v-9.6", "h345.6", "v153.7" ] ],
+    [ "r1:1", "esp:D27", "blue", [ "v-28.8", "h28.8", "h307.2" ] ],
+    [ "rgb1:COM", "esp:GND.2", "black", [ "v66.8", "h182.5", "v0.1" ] ],
+    [ "dht1:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "dht1:VCC", "esp:VIN", "red", [ "v115.2", "h172.8", "v-76.8" ] ],
+    [ "dht1:SDA", "esp:D12", "orange", [ "v48", "h144.1", "v-38.4" ] ],
+    [ "bz1:1", "esp:GND.1", "black", [ "v115.2", "h412.8", "v-57.6" ] ],
+    [ "bz1:2", "esp:D14", "violet", [ "v153.6", "h220.4", "v-124.8" ] ]
+  ],
+  "dependencies": {}
+}

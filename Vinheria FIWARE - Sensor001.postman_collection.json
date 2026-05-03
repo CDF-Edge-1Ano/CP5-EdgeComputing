@@ -1,0 +1,1057 @@
+{
+  "info": {
+    "_postman_id": "e35a5c37-aa3b-429f-9e4a-4e9d4098d33c",
+    "name": "Vinheria FIWARE - Sensor001",
+    "description": "Collection completa para provisionamento e teste do sensor de vinheria. Execute os passos em ordem dentro de cada pasta.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53237423",
+    "_collection_link": "https://go.postman.co/collection/53237423-e35a5c37-aa3b-429f-9e4a-4e9d4098d33c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "PASSO 1 — Health Checks",
+      "item": [
+        {
+          "name": "1.1 IoT Agent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{url}}:4041/iot/about",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "about"
+              ]
+            },
+            "description": "Verifica se o IoT Agent MQTT está rodando."
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Orion Context Broker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{url}}:1026/version",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "version"
+              ]
+            },
+            "description": "Verifica se o Orion está rodando."
+          },
+          "response": []
+        },
+        {
+          "name": "1.3 STH-Comet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{url}}:8666/version",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "8666",
+              "path": [
+                "version"
+              ]
+            },
+            "description": "Verifica se o STH-Comet está rodando."
+          },
+          "response": []
+        }
+      ],
+      "description": "Verifique se todos os serviços estão de pé antes de prosseguir. Todos devem retornar 200."
+    },
+    {
+      "name": "PASSO 2 — Provisionamento do Serviço",
+      "item": [
+        {
+          "name": "2.1 Criar Service Group MQTT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"services\": [\n    {\n      \"apikey\": \"TEF\",\n      \"cbroker\": \"http://{{url}}:1026\",\n      \"entity_type\": \"Thing\",\n      \"resource\": \"\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:4041/iot/services",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "services"
+              ]
+            },
+            "description": "Cria o grupo de serviço com apikey TEF. Resposta esperada: 201 Created."
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 Verificar Service Group",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:4041/iot/services",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "services"
+              ]
+            },
+            "description": "Confirma que o service group foi criado. Deve aparecer o apikey TEF."
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 Deletar Service Group (se precisar recriar)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:4041/iot/services/?resource=&apikey=TEF",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "services",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "resource",
+                  "value": ""
+                },
+                {
+                  "key": "apikey",
+                  "value": "TEF"
+                }
+              ]
+            },
+            "description": "Use apenas se precisar recriar o service group do zero."
+          },
+          "response": []
+        }
+      ],
+      "description": "Registra o grupo de serviço MQTT com apikey TEF. Execute uma vez. Se retornar 409, o serviço já existe — pule para o Passo 3."
+    },
+    {
+      "name": "PASSO 3 — Provisionamento do Dispositivo",
+      "item": [
+        {
+          "name": "3.1 Provisionar Sensor001",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"devices\": [\n    {\n      \"device_id\":   \"sensor001\",\n      \"entity_name\": \"urn:ngsi-ld:Sensor:001\",\n      \"entity_type\": \"Sensor\",\n      \"protocol\":    \"PDI-IoTA-UltraLight\",\n      \"transport\":   \"MQTT\",\n      \"commands\": [\n        { \"name\": \"comando\", \"type\": \"command\" }\n      ],\n      \"attributes\": [\n        { \"object_id\": \"l\", \"name\": \"luminosity\",  \"type\": \"Integer\" },\n        { \"object_id\": \"t\", \"name\": \"temperature\", \"type\": \"Float\"   },\n        { \"object_id\": \"h\", \"name\": \"humidity\",    \"type\": \"Float\"   }\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:4041/iot/devices",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "devices"
+              ]
+            },
+            "description": "Registra o sensor001 com luminosity (l), temperature (t) e humidity (h). Resposta esperada: 201 Created."
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Verificar Dispositivos Provisionados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:4041/iot/devices",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "devices"
+              ]
+            },
+            "description": "Lista todos os devices. Deve aparecer o sensor001."
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Deletar Sensor001 no IoT Agent (se precisar recriar)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:4041/iot/devices/sensor001",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "4041",
+              "path": [
+                "iot",
+                "devices",
+                "sensor001"
+              ]
+            },
+            "description": "Remove o device do IoT Agent. Use em conjunto com 3.4 se precisar recriar."
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 Deletar Sensor001 no Orion (se precisar recriar)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001"
+              ]
+            },
+            "description": "Remove a entidade do Orion. Execute após 3.3."
+          },
+          "response": []
+        }
+      ],
+      "description": "Registra o sensor001 no IoT Agent com os atributos luminosity, temperature e humidity, e o comando de controle. Execute uma vez. Se retornar 409, o device já existe."
+    },
+    {
+      "name": "PASSO 4 — Subscrições STH-Comet",
+      "item": [
+        {
+          "name": "4.1 Subscrever Luminosidade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de luminosidade\",\n  \"subject\": {\n    \"entities\": [\n      { \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }\n    ],\n    \"condition\": { \"attrs\": [\"luminosity\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://{{url}}:8666/notify\" },\n    \"attrs\": [\"luminosity\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/subscriptions",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "subscriptions"
+              ]
+            },
+            "description": "O Orion passará a notificar o STH sempre que luminosity mudar."
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Subscrever Temperatura",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de temperatura\",\n  \"subject\": {\n    \"entities\": [\n      { \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }\n    ],\n    \"condition\": { \"attrs\": [\"temperature\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://{{url}}:8666/notify\" },\n    \"attrs\": [\"temperature\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/subscriptions",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "subscriptions"
+              ]
+            },
+            "description": "O Orion passará a notificar o STH sempre que temperature mudar."
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Subscrever Umidade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de umidade\",\n  \"subject\": {\n    \"entities\": [\n      { \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }\n    ],\n    \"condition\": { \"attrs\": [\"humidity\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://{{url}}:8666/notify\" },\n    \"attrs\": [\"humidity\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/subscriptions",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "subscriptions"
+              ]
+            },
+            "description": "O Orion passará a notificar o STH sempre que humidity mudar."
+          },
+          "response": []
+        },
+        {
+          "name": "4.4 Verificar Subscrições Ativas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/subscriptions",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "subscriptions"
+              ]
+            },
+            "description": "Lista todas as subscrições. Devem aparecer as 3 criadas acima."
+          },
+          "response": []
+        }
+      ],
+      "description": "Cria as subscrições para que o Orion notifique o STH-Comet a cada mudança de valor. Execute uma vez para cada atributo. Resposta esperada: 201 Created."
+    },
+    {
+      "name": "PASSO 5 — Verificar Dados no Orion",
+      "item": [
+        {
+          "name": "5.1 Ver Entidade Completa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001"
+              ]
+            },
+            "description": "Retorna todos os atributos atuais do sensor001. Se luminosity, temperature e humidity aparecerem com valores, o pipeline MQTT → IoT Agent → Orion está funcionando."
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 Ver Temperatura Atual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs/temperature",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs",
+                "temperature"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.3 Ver Umidade Atual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs/humidity",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs",
+                "humidity"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.4 Ver Luminosidade Atual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs/luminosity",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs",
+                "luminosity"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Confirma que o Orion está recebendo os dados publicados pelo Wokwi via MQTT."
+    },
+    {
+      "name": "PASSO 6 — Consultar Histórico (STH-Comet)",
+      "item": [
+        {
+          "name": "6.1 Histórico Temperatura (últimos 10)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:8666/STH/v1/contextEntities/type/Sensor/id/urn:ngsi-ld:Sensor:001/attributes/temperature?lastN=10",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "8666",
+              "path": [
+                "STH",
+                "v1",
+                "contextEntities",
+                "type",
+                "Sensor",
+                "id",
+                "urn:ngsi-ld:Sensor:001",
+                "attributes",
+                "temperature"
+              ],
+              "query": [
+                {
+                  "key": "lastN",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.2 Histórico Umidade (últimos 10)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:8666/STH/v1/contextEntities/type/Sensor/id/urn:ngsi-ld:Sensor:001/attributes/humidity?lastN=10",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "8666",
+              "path": [
+                "STH",
+                "v1",
+                "contextEntities",
+                "type",
+                "Sensor",
+                "id",
+                "urn:ngsi-ld:Sensor:001",
+                "attributes",
+                "humidity"
+              ],
+              "query": [
+                {
+                  "key": "lastN",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.3 Histórico Luminosidade (últimos 10)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:8666/STH/v1/contextEntities/type/Sensor/id/urn:ngsi-ld:Sensor:001/attributes/luminosity?lastN=10",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "8666",
+              "path": [
+                "STH",
+                "v1",
+                "contextEntities",
+                "type",
+                "Sensor",
+                "id",
+                "urn:ngsi-ld:Sensor:001",
+                "attributes",
+                "luminosity"
+              ],
+              "query": [
+                {
+                  "key": "lastN",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Consulta o histórico de dados armazenado pelo STH-Comet. Só terá dados após as subscrições do Passo 4 estarem ativas e o Wokwi publicando."
+    },
+    {
+      "name": "PASSO 7 — Testar Comandos no ESP32",
+      "item": [
+        {
+          "name": "7.1 Simular Temperatura Alta",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@temp_alta|\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "ESP32 deve acender LED vermelho e tocar 3 bipes em 1500 Hz."
+          },
+          "response": []
+        },
+        {
+          "name": "7.2 Simular Temperatura Baixa",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@temp_baixa|\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "ESP32 deve acender LED azul e tocar 3 bipes em 800 Hz."
+          },
+          "response": []
+        },
+        {
+          "name": "7.3 Simular Umidade Alta",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@umidade_alta|\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "ESP32 deve acender LED ciano e tocar 2 bipes em 1200 Hz."
+          },
+          "response": []
+        },
+        {
+          "name": "7.4 Simular Umidade Baixa",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@umidade_baixa|\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "ESP32 deve acender LED amarelo e tocar 2 bipes em 600 Hz."
+          },
+          "response": []
+        },
+        {
+          "name": "7.5 Simular Luminosidade Alta",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@luminosidade_alta|\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "ESP32 deve acender LED magenta e tocar 1 bipe longo em 2000 Hz."
+          },
+          "response": []
+        },
+        {
+          "name": "7.6 Normalizar (Estável)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@estavel|\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "ESP32 deve apagar o alerta, silenciar o buzzer e acender LED verde."
+          },
+          "response": []
+        }
+      ],
+      "description": "Envia comandos de anomalia diretamente para o ESP32 via Orion → IoT Agent → MQTT. Use para testar o LED e buzzer sem depender do Python."
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": "localhost",
+      "description": "Host do servidor. Troque por bore.pub se estiver usando túnel."
+    }
+  ]
+}
