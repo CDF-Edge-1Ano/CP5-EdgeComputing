@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "e35a5c37-aa3b-429f-9e4a-4e9d4098d33c",
-    "name": "Vinheria FIWARE - Sensor001",
-    "description": "Collection completa para provisionamento e teste do sensor de vinheria. Execute os passos em ordem dentro de cada pasta.",
+    "_postman_id": "9cc0ceff-87f3-4ab5-a3d0-d06f0d50d2e5",
+    "name": "Vinheria Agnello — CP5 FIWARE Completo",
+    "description": "Collection completa para o CP5. Inclui provisionamento do sensor001, subscrições STH-Comet, CRUD Orion, comandos de LED (cor, hex, nome, timer, potência) e comandos de anomalia. Execute os passos em ordem dentro de cada pasta.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53237423",
-    "_collection_link": "https://go.postman.co/collection/53237423-e35a5c37-aa3b-429f-9e4a-4e9d4098d33c?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/53237423-9cc0ceff-87f3-4ab5-a3d0-d06f0d50d2e5?source=collection_link"
   },
   "item": [
     {
@@ -117,7 +117,7 @@
                 "services"
               ]
             },
-            "description": "Cria o grupo de serviço com apikey TEF. Resposta esperada: 201 Created."
+            "description": "Resposta esperada: 201 Created."
           },
           "response": []
         },
@@ -146,13 +146,12 @@
                 "iot",
                 "services"
               ]
-            },
-            "description": "Confirma que o service group foi criado. Deve aparecer o apikey TEF."
+            }
           },
           "response": []
         },
         {
-          "name": "2.3 Deletar Service Group (se precisar recriar)",
+          "name": "2.3 Deletar Service Group (reset)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -187,8 +186,7 @@
                   "value": "TEF"
                 }
               ]
-            },
-            "description": "Use apenas se precisar recriar o service group do zero."
+            }
           },
           "response": []
         }
@@ -237,12 +235,12 @@
                 "devices"
               ]
             },
-            "description": "Registra o sensor001 com luminosity (l), temperature (t) e humidity (h). Resposta esperada: 201 Created."
+            "description": "Resposta esperada: 201 Created."
           },
           "response": []
         },
         {
-          "name": "3.2 Verificar Dispositivos Provisionados",
+          "name": "3.2 Listar Dispositivos",
           "request": {
             "method": "GET",
             "header": [
@@ -266,13 +264,12 @@
                 "iot",
                 "devices"
               ]
-            },
-            "description": "Lista todos os devices. Deve aparecer o sensor001."
+            }
           },
           "response": []
         },
         {
-          "name": "3.3 Deletar Sensor001 no IoT Agent (se precisar recriar)",
+          "name": "3.3 Deletar Sensor001 no IoT Agent (reset)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -297,13 +294,12 @@
                 "devices",
                 "sensor001"
               ]
-            },
-            "description": "Remove o device do IoT Agent. Use em conjunto com 3.4 se precisar recriar."
+            }
           },
           "response": []
         },
         {
-          "name": "3.4 Deletar Sensor001 no Orion (se precisar recriar)",
+          "name": "3.4 Deletar Sensor001 no Orion (reset)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -328,13 +324,12 @@
                 "entities",
                 "urn:ngsi-ld:Sensor:001"
               ]
-            },
-            "description": "Remove a entidade do Orion. Execute após 3.3."
+            }
           },
           "response": []
         }
       ],
-      "description": "Registra o sensor001 no IoT Agent com os atributos luminosity, temperature e humidity, e o comando de controle. Execute uma vez. Se retornar 409, o device já existe."
+      "description": "Registra o sensor001 com luminosity, temperature e humidity. Execute uma vez."
     },
     {
       "name": "PASSO 4 — Subscrições STH-Comet",
@@ -359,7 +354,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de luminosidade\",\n  \"subject\": {\n    \"entities\": [\n      { \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }\n    ],\n    \"condition\": { \"attrs\": [\"luminosity\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://{{url}}:8666/notify\" },\n    \"attrs\": [\"luminosity\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
+              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de luminosidade\",\n  \"subject\": {\n    \"entities\": [{ \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }],\n    \"condition\": { \"attrs\": [\"luminosity\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://fiware-sth-comet:8666/notify\" },\n    \"attrs\": [\"luminosity\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -377,8 +372,7 @@
                 "v2",
                 "subscriptions"
               ]
-            },
-            "description": "O Orion passará a notificar o STH sempre que luminosity mudar."
+            }
           },
           "response": []
         },
@@ -402,7 +396,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de temperatura\",\n  \"subject\": {\n    \"entities\": [\n      { \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }\n    ],\n    \"condition\": { \"attrs\": [\"temperature\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://{{url}}:8666/notify\" },\n    \"attrs\": [\"temperature\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
+              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de temperatura\",\n  \"subject\": {\n    \"entities\": [{ \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }],\n    \"condition\": { \"attrs\": [\"temperature\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://fiware-sth-comet:8666/notify\" },\n    \"attrs\": [\"temperature\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -420,8 +414,7 @@
                 "v2",
                 "subscriptions"
               ]
-            },
-            "description": "O Orion passará a notificar o STH sempre que temperature mudar."
+            }
           },
           "response": []
         },
@@ -445,7 +438,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de umidade\",\n  \"subject\": {\n    \"entities\": [\n      { \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }\n    ],\n    \"condition\": { \"attrs\": [\"humidity\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://{{url}}:8666/notify\" },\n    \"attrs\": [\"humidity\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
+              "raw": "{\n  \"description\": \"Notifica STH-Comet sobre mudanças de umidade\",\n  \"subject\": {\n    \"entities\": [{ \"id\": \"urn:ngsi-ld:Sensor:001\", \"type\": \"Sensor\" }],\n    \"condition\": { \"attrs\": [\"humidity\"] }\n  },\n  \"notification\": {\n    \"http\": { \"url\": \"http://fiware-sth-comet:8666/notify\" },\n    \"attrs\": [\"humidity\"],\n    \"attrsFormat\": \"legacy\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -463,8 +456,7 @@
                 "v2",
                 "subscriptions"
               ]
-            },
-            "description": "O Orion passará a notificar o STH sempre que humidity mudar."
+            }
           },
           "response": []
         },
@@ -493,19 +485,37 @@
                 "v2",
                 "subscriptions"
               ]
-            },
-            "description": "Lista todas as subscrições. Devem aparecer as 3 criadas acima."
+            }
           },
           "response": []
         }
       ],
-      "description": "Cria as subscrições para que o Orion notifique o STH-Comet a cada mudança de valor. Execute uma vez para cada atributo. Resposta esperada: 201 Created."
+      "description": "Cria subscrições para que o Orion notifique o STH-Comet a cada mudança. ATENÇÃO: a URL de notificação usa o nome do container Docker, não localhost."
     },
     {
-      "name": "PASSO 5 — Verificar Dados no Orion",
+      "name": "PASSO 5 — Orion Context Broker (CRUD)",
       "item": [
         {
-          "name": "5.1 Ver Entidade Completa",
+          "name": "5.1 Versão do Orion",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{url}}:1026/version",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "version"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 Ver Entidade Completa",
           "request": {
             "method": "GET",
             "header": [
@@ -534,13 +544,12 @@
                 "entities",
                 "urn:ngsi-ld:Sensor:001"
               ]
-            },
-            "description": "Retorna todos os atributos atuais do sensor001. Se luminosity, temperature e humidity aparecerem com valores, o pipeline MQTT → IoT Agent → Orion está funcionando."
+            }
           },
           "response": []
         },
         {
-          "name": "5.2 Ver Temperatura Atual",
+          "name": "5.3 Ver Temperatura Atual",
           "request": {
             "method": "GET",
             "header": [
@@ -572,7 +581,7 @@
           "response": []
         },
         {
-          "name": "5.3 Ver Umidade Atual",
+          "name": "5.4 Ver Umidade Atual",
           "request": {
             "method": "GET",
             "header": [
@@ -604,7 +613,7 @@
           "response": []
         },
         {
-          "name": "5.4 Ver Luminosidade Atual",
+          "name": "5.5 Ver Luminosidade Atual",
           "request": {
             "method": "GET",
             "header": [
@@ -634,12 +643,89 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "5.6 Listar Todas as Entidades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.7 Atualizar Múltiplos Atributos",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"temperature\": { \"type\": \"Float\",   \"value\": 13 },\n  \"humidity\":    { \"type\": \"Float\",   \"value\": 60 },\n  \"luminosity\":  { \"type\": \"Integer\", \"value\": 20 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            }
+          },
+          "response": []
         }
       ],
-      "description": "Confirma que o Orion está recebendo os dados publicados pelo Wokwi via MQTT."
+      "description": "Operações diretas sobre entidades no Orion."
     },
     {
-      "name": "PASSO 6 — Consultar Histórico (STH-Comet)",
+      "name": "PASSO 6 — Histórico STH-Comet",
       "item": [
         {
           "name": "6.1 Histórico Temperatura (últimos 10)",
@@ -768,13 +854,13 @@
           "response": []
         }
       ],
-      "description": "Consulta o histórico de dados armazenado pelo STH-Comet. Só terá dados após as subscrições do Passo 4 estarem ativas e o Wokwi publicando."
+      "description": "Consulta o histórico armazenado. Só retorna dados após as subscrições do Passo 4 estarem ativas."
     },
     {
-      "name": "PASSO 7 — Testar Comandos no ESP32",
+      "name": "PASSO 7 — Comandos de Anomalia (ESP32)",
       "item": [
         {
-          "name": "7.1 Simular Temperatura Alta",
+          "name": "7.1 Temperatura Alta — LED vermelho, 3 bipes 1500Hz",
           "request": {
             "method": "PATCH",
             "header": [
@@ -793,7 +879,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@temp_alta|\"\n  }\n}",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@temp_alta|\" }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -813,13 +899,12 @@
                 "urn:ngsi-ld:Sensor:001",
                 "attrs"
               ]
-            },
-            "description": "ESP32 deve acender LED vermelho e tocar 3 bipes em 1500 Hz."
+            }
           },
           "response": []
         },
         {
-          "name": "7.2 Simular Temperatura Baixa",
+          "name": "7.2 Temperatura Baixa — LED azul, 3 bipes 800Hz",
           "request": {
             "method": "PATCH",
             "header": [
@@ -838,7 +923,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@temp_baixa|\"\n  }\n}",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@temp_baixa|\" }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -858,13 +943,12 @@
                 "urn:ngsi-ld:Sensor:001",
                 "attrs"
               ]
-            },
-            "description": "ESP32 deve acender LED azul e tocar 3 bipes em 800 Hz."
+            }
           },
           "response": []
         },
         {
-          "name": "7.3 Simular Umidade Alta",
+          "name": "7.3 Umidade Alta — LED ciano, 2 bipes 1200Hz",
           "request": {
             "method": "PATCH",
             "header": [
@@ -883,7 +967,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@umidade_alta|\"\n  }\n}",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@umidade_alta|\" }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -903,13 +987,12 @@
                 "urn:ngsi-ld:Sensor:001",
                 "attrs"
               ]
-            },
-            "description": "ESP32 deve acender LED ciano e tocar 2 bipes em 1200 Hz."
+            }
           },
           "response": []
         },
         {
-          "name": "7.4 Simular Umidade Baixa",
+          "name": "7.4 Umidade Baixa — LED amarelo, 2 bipes 600Hz",
           "request": {
             "method": "PATCH",
             "header": [
@@ -928,7 +1011,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@umidade_baixa|\"\n  }\n}",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@umidade_baixa|\" }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -948,13 +1031,12 @@
                 "urn:ngsi-ld:Sensor:001",
                 "attrs"
               ]
-            },
-            "description": "ESP32 deve acender LED amarelo e tocar 2 bipes em 600 Hz."
+            }
           },
           "response": []
         },
         {
-          "name": "7.5 Simular Luminosidade Alta",
+          "name": "7.5 Luminosidade Alta — LED magenta, 1 bipe longo 2000Hz",
           "request": {
             "method": "PATCH",
             "header": [
@@ -973,7 +1055,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@luminosidade_alta|\"\n  }\n}",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@luminosidade_alta|\" }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -993,13 +1075,12 @@
                 "urn:ngsi-ld:Sensor:001",
                 "attrs"
               ]
-            },
-            "description": "ESP32 deve acender LED magenta e tocar 1 bipe longo em 2000 Hz."
+            }
           },
           "response": []
         },
         {
-          "name": "7.6 Normalizar (Estável)",
+          "name": "7.6 Normalizar — LED verde, silêncio",
           "request": {
             "method": "PATCH",
             "header": [
@@ -1018,7 +1099,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comando\": {\n    \"type\": \"command\",\n    \"value\": \"sensor001@estavel|\"\n  }\n}",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@estavel|\" }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1038,20 +1119,383 @@
                 "urn:ngsi-ld:Sensor:001",
                 "attrs"
               ]
-            },
-            "description": "ESP32 deve apagar o alerta, silenciar o buzzer e acender LED verde."
+            }
           },
           "response": []
         }
       ],
-      "description": "Envia comandos de anomalia diretamente para o ESP32 via Orion → IoT Agent → MQTT. Use para testar o LED e buzzer sem depender do Python."
+      "description": "Envia comandos de anomalia diretamente ao ESP32 via Orion. LED e buzzer respondem conforme o tipo."
+    },
+    {
+      "name": "PASSO 8 — Comandos de LED (cor, hex, timer, potência)",
+      "item": [
+        {
+          "name": "8.1 Ligar LED (branco)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@on|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.2 Desligar LED",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@off|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.3 Cor por Nome (vermelho)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@vermelho|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "Nomes disponíveis por padrão: ligar, desligar, vermelho, azul, verde, amarelo."
+          },
+          "response": []
+        },
+        {
+          "name": "8.4 Cor por Hexadecimal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@#FF6600|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "Qualquer cor em formato #RRGGBB."
+          },
+          "response": []
+        },
+        {
+          "name": "8.5 Cor com Timer (apaga após 10s)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@verde|t10|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "Formato: COR|tSEGUNDOS| — o LED apaga automaticamente após o tempo definido."
+          },
+          "response": []
+        },
+        {
+          "name": "8.6 Cor com Potência (50%)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@azul|p50|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "Formato: COR|pVALOR| — potência de 0 a 100."
+          },
+          "response": []
+        },
+        {
+          "name": "8.7 Cor com Timer e Potência",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@#FF00FF|t15|p75|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "Formato: COR|tSEGUNDOS|pVALOR| — combina timer e potência."
+          },
+          "response": []
+        },
+        {
+          "name": "8.8 Cadastrar Nova Cor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "fiware-service",
+                "value": "smart"
+              },
+              {
+                "key": "fiware-servicepath",
+                "value": "/"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comando\": { \"type\": \"command\", \"value\": \"sensor001@add|laranja|#FF6600|\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{url}}:1026/v2/entities/urn:ngsi-ld:Sensor:001/attrs",
+              "protocol": "http",
+              "host": [
+                "{{url}}"
+              ],
+              "port": "1026",
+              "path": [
+                "v2",
+                "entities",
+                "urn:ngsi-ld:Sensor:001",
+                "attrs"
+              ]
+            },
+            "description": "Formato: add|NOME|#HEXA| — cadastra nova cor por nome no firmware. Após cadastrar, use o nome normalmente."
+          },
+          "response": []
+        }
+      ],
+      "description": "Controle manual do LED RGB. Formatos suportados pelo firmware: nome, hex, on/off, timer e potência."
     }
   ],
   "variable": [
     {
       "key": "url",
       "value": "localhost",
-      "description": "Host do servidor. Troque por bore.pub se estiver usando túnel."
+      "description": "IP do servidor FIWARE. Troque pelo IP da VM se necessário."
     }
   ]
 }
