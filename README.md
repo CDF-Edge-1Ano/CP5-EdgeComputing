@@ -115,7 +115,7 @@ Os bipes se repetem a cada 4 segundos enquanto a anomalia persistir.
 ```
 CP5-EdgeComputing/
 ├── dashboard_vinheria.py                          # Dashboard Flask com lógica de alertas
-├── wokwiLocal.ino                                 # Firmware ESP32
+├── Sketch.ino                                 # Firmware ESP32
 ├── diagram.json                                   # Diagrama de circuito do Wokwi
 ├── Vinheria FIWARE - Sensor001.postman_collection.json  # Collection Postman
 ├── requirements.txt                               # Dependências Python
@@ -162,7 +162,7 @@ BROKER_MQTT = "SEU_IP"
 BROKER_PORT = 1883
 ```
  
-Em `wokwiLocal.ino`, atualize o broker:
+Em `Sketch.ino`, atualize o broker:
  
 ```cpp
 const char* default_BROKER_MQTT = "SEU_IP";
