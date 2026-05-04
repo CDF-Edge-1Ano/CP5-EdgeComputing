@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>APAP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+</head>
+
+<body">
+
+    <h2 id="titulo">APAP</h2>
+
+    <div class="graficos">
+        <div class="grafico"><canvas id="tempChart"></canvas></div>
+        <div class="grafico"><canvas id="humChart"></canvas></div>
+        <div class="grafico"><canvas id="lumChart"></canvas></div>
+    </div>
+
+    <div class="estadoAtual" id="estadoAtual">
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='script/script.js') }}"></script>
+
+</body>
+
+</html>

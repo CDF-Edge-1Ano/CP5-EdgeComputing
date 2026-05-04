@@ -2,11 +2,11 @@
 #include <PubSubClient.h>
 #include <vector>
 #include <DHT.h>
-
-const char* default_SSID = "Wokwi-GUEST";
-const char* default_PASSWORD = "";
-const char* default_BROKER_MQTT = "bore.pub";
-const int default_BROKER_PORT = 58233;
+ 
+const char* default_SSID = "FIAP-IOT";
+const char* default_PASSWORD = "F!@p25.IOT";
+const char* default_BROKER_MQTT = "34.39.176.211";
+const int default_BROKER_PORT = 1883;
 const char* default_TOPICO_SUBSCRIBE = "/TEF/sensor001/cmd";
 const char* default_TOPICO_SUBSCRIBE2 = "/TEF/sensor001/cmd/";
 const char* default_TOPICO_PUBLISH_1 = "/TEF/sensor001/attrs";
@@ -15,13 +15,13 @@ const char* default_TOPICO_PUBLISH_3 = "/TEF/sensor001/attrs/t";
 const char* default_TOPICO_PUBLISH_4 = "/TEF/sensor001/attrs/h";
 const char* default_PICO_PUBLISH_3 = "/tef/sensor";
 const char* default_ID_MQTT = "fiware_001";
-
+ 
 const char* topicPrefix = "sensor001";
-
-#define DHTPIN 12
-#define DHTTYPE DHT22
+ 
+#define DHTPIN 21
+#define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
-
+ 
 char* SSID = const_cast<char*>(default_SSID);
 char* PASSWORD = const_cast<char*>(default_PASSWORD);
 char* BROKER_MQTT = const_cast<char*>(default_BROKER_MQTT);
@@ -32,30 +32,30 @@ char* TOPICO_PUBLISH_2 = const_cast<char*>(default_TOPICO_PUBLISH_2);
 char* TOPICO_PUBLISH_3 = const_cast<char*>(default_TOPICO_PUBLISH_3);
 char* TOPICO_PUBLISH_4 = const_cast<char*>(default_TOPICO_PUBLISH_4);
 char* ID_MQTT = const_cast<char*>(default_ID_MQTT);
-
+ 
 const int RED_PIN   = 25;
 const int GREEN_PIN = 26;
 const int BLUE_PIN  = 27;
 const int buzzer_pin = 14;
-
+ 
 WiFiClient espClient;
 PubSubClient MQTT(espClient);
 char EstadoSaida = '0';
 bool modoCritico = false;
 unsigned long timerEndMillis = 0;
 int potencia = 100;
-
+ 
 // ── ANOMALIA ATIVA ────────────────────────────────────────────────────────────
 // Guarda qual anomalia está ativa para que o loop() possa repetir os bipes
 String anomaliaAtiva = "";
-
+ 
 // Controle de repetição de bipes sem bloquear o loop
 unsigned long proximoBipe = 0;
 const unsigned long INTERVALO_REPETICAO = 4000; // repete a sequência a cada 4s
-
+ 
 std::vector<String> nomesCores = {"ligar", "desligar", "vermelho", "azul", "verde", "amarelo"};
 std::vector<String> hexaCores  = {"#FFFFFF", "#000000", "#FF0000", "#0000FF", "#00FF00", "#FFFF00"};
-
+ 
 // ── PROTÓTIPOS ────────────────────────────────────────────────────────────────
 void initSerial();
 void initWiFi();
@@ -74,9 +74,9 @@ void adicionarNovaCor(String msg);
 void entrarModoCritico();
 void sairModoCritico();
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
-
+ 
 // ── FUNÇÕES DE ANOMALIA ───────────────────────────────────────────────────────
-
+ 
 // Toca um bipe simples com frequência e duração definidos.
 // Usa tone()/noTone() — disponível no Wokwi com ESP32.
 void tocarBipe(int frequencia, int duracao) {
@@ -85,7 +85,7 @@ void tocarBipe(int frequencia, int duracao) {
     noTone(buzzer_pin);
     delay(80); // pausa entre bipes
 }
-
+ 
 // Executa a sequência de bipes correspondente à anomalia.
 void executarBipes(String anomalia) {
     if (anomalia == "temp_alta") {
@@ -114,14 +114,14 @@ void executarBipes(String anomalia) {
         tocarBipe(2000, 600);
     }
 }
-
+ 
 // Ativa o LED e o buzzer conforme a anomalia recebida.
 void ativarAnomalia(String anomalia) {
     anomaliaAtiva = anomalia;
     modoCritico   = true;
     EstadoSaida   = '1';
     proximoBipe   = 0; // força execução imediata no próximo loop
-
+ 
     if (anomalia == "temp_alta") {
         Serial.println(F("*** ANOMALIA: TEMPERATURA ALTA — LED vermelho ***"));
         setarCorPraHex("#FF0000");
@@ -149,20 +149,20 @@ void ativarAnomalia(String anomalia) {
         digitalWrite(buzzer_pin, HIGH);
     }
 }
-
+ 
 // Chamada no loop() para repetir os bipes enquanto há anomalia ativa.
 void gerenciarBipesAtivos() {
     if (!modoCritico || anomaliaAtiva == "") return;
-
+ 
     unsigned long agora = millis();
     if (agora >= proximoBipe) {
         executarBipes(anomaliaAtiva);
         proximoBipe = agora + INTERVALO_REPETICAO;
     }
 }
-
+ 
 // ── SETUP / LOOP ──────────────────────────────────────────────────────────────
-
+ 
 void setup() {
     InitOutput();
     initSerial();
@@ -172,7 +172,7 @@ void setup() {
     MQTT.publish(TOPICO_PUBLISH_1, "s|on");
     dht.begin();
 }
-
+ 
 void loop() {
     VerificaConexoesWiFIEMQTT();
     EnviaEstadoOutputMQTT();
@@ -182,21 +182,21 @@ void loop() {
     gerenciarBipesAtivos(); // <-- único acréscimo no loop
     MQTT.loop();
 }
-
+ 
 // ── CALLBACK MQTT ─────────────────────────────────────────────────────────────
-
+ 
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     String msgOriginal;
     for (int i = 0; i < length; i++) {
         char c = (char)payload[i];
         msgOriginal += c;
     }
-
+ 
     msgOriginal.trim();
     msgOriginal.toLowerCase();
     Serial.print("- Mensagem recebida (raw): ");
     Serial.println(msgOriginal);
-
+ 
     // Extrai o conteúdo após o último '@' — resolve o duplo encapsulamento
     // do Orion: "sensor001@comando|sensor001@temp_alta|"
     int posArroba = msgOriginal.lastIndexOf('@');
@@ -210,27 +210,27 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
         Serial.print("- Comando extraido: ");
         Serial.println(msgOriginal);
     }
-
+ 
     potencia = 100;
-
+ 
     String parteCor = msgOriginal;
     int timerSegundos = 0;
     int potenciaTemp = 100;
-
+ 
     int pos1 = msgOriginal.indexOf('|');
     int pos2 = msgOriginal.indexOf('|', pos1 + 1);
-
+ 
     if (pos1 != -1) {
         parteCor = msgOriginal.substring(0, pos1);
-
+ 
         if (pos2 != -1) {
             String param1 = msgOriginal.substring(pos1 + 1, pos2);
             String param2 = msgOriginal.substring(pos2 + 1);
             param1.trim(); param2.trim();
-
+ 
             if (param1.startsWith("t")) { param1.remove(0,1); timerSegundos = param1.toInt(); }
             else if (param1.startsWith("p")) { param1.remove(0,1); potenciaTemp = param1.toInt(); }
-
+ 
             if (param2.startsWith("t")) { param2.remove(0,1); timerSegundos = param2.toInt(); }
             else if (param2.startsWith("p")) { param2.remove(0,1); potenciaTemp = param2.toInt(); }
         } else {
@@ -240,13 +240,13 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
             else if (param1.startsWith("p")) { param1.remove(0,1); potenciaTemp = param1.toInt(); }
         }
     }
-
+ 
     if (potenciaTemp != 100) {
         potencia = potenciaTemp;
         Serial.print("Potencia: ");
         Serial.println(potencia);
     }
-
+ 
     // ── COMANDOS ORIGINAIS ────────────────────────────────────────────────────
     if (parteCor == "on") {
         EstadoSaida = '1';
@@ -265,7 +265,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
         EstadoSaida = '1';
         return;
     }
-
+ 
     // ── COMANDOS DE ANOMALIA ESPECÍFICA (novos) ───────────────────────────────
     if (parteCor == "temp_alta"        ||
         parteCor == "temp_baixa"       ||
@@ -275,7 +275,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
         ativarAnomalia(parteCor);
         return;
     }
-
+ 
     // ── COMANDOS GENÉRICOS (compatibilidade) ──────────────────────────────────
     if (parteCor == "critico") {
         ativarAnomalia("critico");
@@ -285,7 +285,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
         sairModoCritico();
         return;
     }
-
+ 
     if (parteCor.startsWith("#")) {
         Serial.println("cor recebida Hex:");
         Serial.println(parteCor);
@@ -300,7 +300,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     } else {
         setarUsandoNome(parteCor);
     }
-
+ 
     if (timerSegundos > 0) {
         timerEndMillis = millis() + (timerSegundos * 1000UL);
         Serial.print("Timer ativado: ");
@@ -308,11 +308,11 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
         Serial.println(" segundos");
     }
 }
-
+ 
 // ── FUNÇÕES ORIGINAIS (inalteradas) ──────────────────────────────────────────
-
+ 
 void initSerial() { Serial.begin(115200); }
-
+ 
 void initWiFi() {
     delay(10);
     Serial.println("------Conexao WI-FI------");
@@ -321,12 +321,12 @@ void initWiFi() {
     Serial.println("Aguarde");
     reconectWiFi();
 }
-
+ 
 void initMQTT() {
     MQTT.setServer(BROKER_MQTT, BROKER_PORT);
     MQTT.setCallback(mqtt_callback);
 }
-
+ 
 void reconectWiFi() {
     if (WiFi.status() == WL_CONNECTED) return;
     WiFi.begin(SSID, PASSWORD);
@@ -338,26 +338,26 @@ void reconectWiFi() {
     Serial.println(WiFi.localIP());
     setarCorPraHex("#000000");
 }
-
+ 
 void VerificaConexoesWiFIEMQTT() {
     if (!MQTT.connected()) reconnectMQTT();
     reconectWiFi();
 }
-
+ 
 void EnviaEstadoOutputMQTT() {
     if (EstadoSaida == '1') Serial.println("- Led Ligado");
     if (EstadoSaida == '0') Serial.println("- Led Desligado");
     Serial.println("- Estado do LED enviado ao broker!");
     delay(1000);
 }
-
+ 
 void InitOutput() {
     pinMode(RED_PIN,   OUTPUT);
     pinMode(GREEN_PIN, OUTPUT);
     pinMode(BLUE_PIN,  OUTPUT);
     pinMode(buzzer_pin, OUTPUT);
 }
-
+ 
 void verificarTimer() {
     if (timerEndMillis > 0 && millis() >= timerEndMillis) {
         timerEndMillis = 0;
@@ -366,7 +366,7 @@ void verificarTimer() {
         EstadoSaida = '0';
     }
 }
-
+ 
 void reconnectMQTT() {
     while (!MQTT.connected()) {
         Serial.print("* Tentando se conectar ao Broker MQTT: ");
@@ -381,37 +381,37 @@ void reconnectMQTT() {
         }
     }
 }
-
+ 
 void handleLuminosity() {
     const int potPin = 34;
     int sensorValue = analogRead(potPin);
-    int luminosity = map(sensorValue, 0, 4095, 0, 100);
+    int luminosity = map(sensorValue, 4095, 0, 0, 100);
     String mensagem = String(luminosity);
     Serial.print(F("Valor da luminosidade: "));
     Serial.println(mensagem.c_str());
     MQTT.publish(TOPICO_PUBLISH_2, mensagem.c_str());
 }
-
+ 
 void handleEnviroment() {
     int h_raw = (int)dht.readHumidity();
     int t_raw = (int)dht.readTemperature();
-
+ 
     if (isnan(h_raw) || isnan(t_raw)) {
-        Serial.println(F("o sensor dht22 nao ta lendo"));
+        Serial.println(F("o sensor dht11 nao ta lendo"));
         return;
     }
-
+ 
     int h = (int)h_raw;
     int t = (int)t_raw;
     int tPercent = t;
-
+ 
     MQTT.publish(TOPICO_PUBLISH_3, String(tPercent).c_str());
     MQTT.publish(TOPICO_PUBLISH_4, String(h).c_str());
-
+ 
     Serial.print(F("T: ")); Serial.print(tPercent); Serial.print(F("C | "));
     Serial.print(F("U: ")); Serial.print(h); Serial.println(F("%"));
 }
-
+ 
 void setarCorPraHex(String hexColor) {
     if (hexColor.startsWith("#")) hexColor.remove(0, 1);
     long number = strtol(hexColor.c_str(), NULL, 16);
@@ -428,7 +428,7 @@ void setarCorPraHex(String hexColor) {
     Serial.print(F("RGB -> ")); Serial.print(r); Serial.print(",");
     Serial.print(g); Serial.print(","); Serial.println(b);
 }
-
+ 
 void setarUsandoNome(String msg) {
     msg.trim();
     msg.toLowerCase();
@@ -445,7 +445,7 @@ void setarUsandoNome(String msg) {
     Serial.println("Cor nao encontrada na lista.");
     EstadoSaida = '0';
 }
-
+ 
 void adicionarNovaCor(String msg) {
     int pos1 = msg.indexOf('|');
     int pos2 = msg.indexOf('|', pos1 + 1);
@@ -465,7 +465,7 @@ void adicionarNovaCor(String msg) {
         Serial.println(F("Erro no formato! Use: add|nome|#hexa"));
     }
 }
-
+ 
 void entrarModoCritico() {
     modoCritico = true;
     EstadoSaida = '1';
@@ -473,7 +473,7 @@ void entrarModoCritico() {
     setarCorPraHex("#FF0000");
     digitalWrite(buzzer_pin, HIGH);
 }
-
+ 
 void sairModoCritico() {
     modoCritico   = false;
     anomaliaAtiva = "";
@@ -484,3 +484,4 @@ void sairModoCritico() {
     setarCorPraHex("#00FF00");
     EstadoSaida = '1';
 }
+ 

@@ -1,129 +1,134 @@
-# Vinheria Agnaldo — Monitoramento Ambiental com FIWARE
- 
-Sistema de monitoramento ambiental para conservação de vinhos, utilizando ESP32 (simulado no Wokwi), stack FIWARE e dashboard Python. O sistema detecta anomalias em tempo real e aciona alertas visuais e sonoros no hardware.
- 
-**Simulação Wokwi:** [https://wokwi.com/projects/461036532566146049](https://wokwi.com/projects/461036532566146049)
- 
+# APAP - Monitoramento IoT com FIWARE, MQTT e Dashboard Web
+
+## Desenvolvedores
+| Nome | Função |
+|------|--------|
+| Gabriel Ardito | Dsenvolveimento |
+| Felipe Menezes | Desenvolvimento |
+| João Sarracine | Desenvolvimento |
+| João Gonzales  | Desenvolvimento |
+
 ---
- 
-## Equipe
- 
-| Nome | RM |
-|---|---|
-| Felipe Menezes | 566607  |
-| Gabriel Ardito | 568318  |
-| João Sarracine | 567407 |
-| João Gonzales | 568166 |
- 
+
+## Descrição
+
+O APAP é um sistema de monitoramento IoT que coleta, processa e visualiza dados ambientais em tempo real. O projeto integra sensores (via FIWARE), comunicação MQTT e um dashboard web interativo para acompanhamento de métricas como temperatura, umidade e luminosidade.
+
+Além da visualização, o sistema realiza detecção de anomalias e envia comandos automaticamente via MQTT quando condições críticas são identificadas.
+
 ---
- 
-## Arquitetura
- 
+
+## Arquitetura do Projeto
+
+O sistema é composto por três principais camadas:
+
+### 1. Backend (Flask)
+Responsável por:
+- Buscar dados do FIWARE
+- Processar e detectar anomalias
+- Expor API (/dados)
+- Enviar comandos via MQTT
+
+Arquivo principal: app.py
+
+---
+
+### 2. Frontend (Dashboard)
+Interface web que:
+- Exibe gráficos em tempo real
+- Mostra estado atual do sistema
+- Atualiza automaticamente a cada 2 segundos
+
+Arquivos:
+- HTML: index.html  
+- CSS: style.css  
+- JS: script.js  
+
+---
+
+### 3. Integração com IoT
+- Dados consumidos via FIWARE (STH-Comet)
+- Comunicação com dispositivos via MQTT
+- Broker MQTT configurado no backend
+
+---
+
+## Funcionalidades
+
+- Monitoramento em tempo real de:
+  - Temperatura
+  - Umidade
+  - Luminosidade
+
+- Visualização com gráficos dinâmicos (Chart.js)
+
+- Detecção automática de anomalias:
+  - Temperatura alta ou baixa
+  - Umidade alta ou baixa
+  - Luminosidade elevada
+
+- Envio automático de comandos MQTT quando ocorre mudança de estado
+
+- Atualização contínua da interface
+
+---
+
+## Regras de Anomalia
+
+| Condição | Estado |
+|--------|--------|
+| Temp ≥ 30°C | temp_alta |
+| Temp ≤ 0°C | temp_baixa |
+| Umidade ≥ 70% | umidade_alta |
+| Umidade ≤ 20% | umidade_baixa |
+| Luminosidade ≥ 90% | luminosidade_alta |
+| Caso contrário | estavel |
+
+---
+
+## Tecnologias Utilizadas
+
+### Backend
+- Python
+- Flask
+- Requests
+- Paho MQTT
+
+### Frontend
+- HTML5
+- CSS3
+- JavaScript
+- Chart.js
+
+### IoT / Middleware
+- FIWARE (STH-Comet)
+- MQTT
+
+---
+
+## Estrutura do Projeto
+
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        WOKWI (Simulador)                        │
-│                                                                 │
-│  DHT22 ──► Temperatura / Umidade                                │
-│  LDR   ──► Luminosidade                                         │
-│  RGB LED ◄─ Comandos de anomalia                                │
-│  Buzzer  ◄─ Alertas sonoros                                     │
-│                    ESP32                                        │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ MQTT (porta 1883)
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     FIWARE Stack (Docker)                       │
-│                                                                 │
-│  Mosquitto (1883) ──► IoT Agent UL ──► Orion Context Broker    │
-│                                               │                 │
-│                                               ▼                 │
-│                                        STH-Comet (8666)        │
-│                                        MongoDB (histórico)      │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ HTTP (porta 8666)
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Dashboard Python (Flask)                     │
-│                                                                 │
-│  - Consulta STH-Comet (lastN=20)                                │
-│  - Serve dashboard web na porta 5000                            │
-│  - Avalia thresholds de anomalia                                │
-│  - Publica comandos MQTT de volta ao ESP32                      │
-└─────────────────────────────────────────────────────────────────┘
+.
+├── client/
+│   ├── app.py
+│   ├── templates/
+│   │   └── index.html
+│   └── static/
+│       ├── style/
+│       │   └── style.css
+│       └── script/
+│           └── script.js
+├── diagram.json
+├── README.md
+├── requirements.txt
+├── sketch.ino
+└── Vinheria FIWARE - Sensor001.postman_collection.json
 ```
- 
+
 ---
- 
-## Componentes
- 
-| Componente | Função | Porta |
-|---|---|---|
-| ESP32 (Wokwi) | Lê sensores e executa comandos | — |
-| Mosquitto | Broker MQTT | 1883 |
-| IoT Agent UL | Traduz MQTT → NGSI | 4041 |
-| Orion Context Broker | Gerencia entidades e subscrições | 1026 |
-| STH-Comet | Armazena histórico de séries temporais | 8666 |
-| MongoDB | Banco de dados do Orion e STH | 27017 |
-| Dashboard Python | Visualização e lógica de alertas | 5000 |
- 
----
- 
-## Tópicos MQTT
- 
-| Tópico | Direção | Conteúdo |
-|---|---|---|
-| `/TEF/sensor001/attrs/l` | ESP32 → Broker | Luminosidade (0–100%) |
-| `/TEF/sensor001/attrs/t` | ESP32 → Broker | Temperatura (°C) |
-| `/TEF/sensor001/attrs/h` | ESP32 → Broker | Umidade (%) |
-| `/TEF/sensor001/cmd` | Broker → ESP32 | Comandos de anomalia |
- 
----
- 
-## Thresholds de Conservação de Vinho
- 
-Baseados nas condições ideais para armazenamento de vinhos finos.
- 
-| Parâmetro | Mínimo | Máximo | Consequência fora do range |
-|---|---|---|---|
-| Temperatura | 10 °C | 15 °C | Abaixo: amargueia o vinho. Acima: acelera oxidação e degrada taninos |
-| Umidade | 50% | 70% | Abaixo: resseca rolhas (entrada de ar). Acima: proliferação de mofo |
-| Luminosidade | 0% | 30% | Acima: luz UV degrada taninos e compostos aromáticos |
- 
----
- 
-## Mapeamento de Anomalias
- 
-Cada anomalia gera uma resposta visual e sonora distinta no ESP32.
- 
-| Anomalia | Comando MQTT | Cor do LED | Tom (Hz) | Padrão de Bipes |
-|---|---|---|---|---|
-| Temperatura alta | `temp_alta` | Vermelho | 1500 Hz | 3 bipes curtos |
-| Temperatura baixa | `temp_baixa` | Azul | 800 Hz | 3 bipes curtos |
-| Umidade alta | `umidade_alta` | Ciano | 1200 Hz | 2 bipes curtos |
-| Umidade baixa | `umidade_baixa` | Amarelo | 600 Hz | 2 bipes curtos |
-| Luminosidade alta | `luminosidade_alta` | Magenta | 2000 Hz | 1 bipe longo |
-| Normalizado | `estavel` | Verde | — | Silêncio |
- 
-Os bipes se repetem a cada 4 segundos enquanto a anomalia persistir.
- 
-**Prioridade de avaliação:** temperatura > umidade > luminosidade. Apenas uma anomalia é reportada por vez.
- 
----
- 
-## Estrutura de Arquivos
- 
-```
-CP5-EdgeComputing/
-├── dashboard_vinheria.py                          # Dashboard Flask com lógica de alertas
-├── Sketch.ino                                 # Firmware ESP32
-├── diagram.json                                   # Diagrama de circuito do Wokwi
-├── Vinheria FIWARE - Sensor001.postman_collection.json  # Collection Postman
-├── requirements.txt                               # Dependências Python
-└── README.md
-```
- 
----
- 
+
+
 ## Instalação e Execução
  
 ### Pré-requisitos
@@ -180,39 +185,35 @@ python3 dashboard_vinheria.py
 ```
  
 Acesse em: [http://localhost:5000](http://localhost:5000)
- 
+
 ---
- 
-## Fluxo de Dados
- 
-```
-ESP32 publica sensor → Mosquitto → IoT Agent → Orion
-                                                  │
-                                            Subscrição
-                                                  │
-                                                  ▼
-                                            STH-Comet (armazena)
-                                                  │
-                                     Python consulta (lastN=20)
-                                                  │
-                                         Avalia thresholds
-                                                  │
-                               ┌──────────────────┴──────────────────┐
-                               │ Anomalia detectada                  │ Normal
-                               ▼                                     ▼
-                  Publica comando MQTT                   Publica "estavel"
-                  (ex: temp_alta)                        se estava crítico
-                               │
-                               ▼
-                  ESP32 recebe → LED + Buzzer
-```
- 
+
+## Funcionamento do Fluxo
+
+1. O frontend faz requisições periódicas para /dados
+2. O backend consulta o FIWARE
+3. Os dados são processados
+4. O sistema verifica anomalias
+5. Se houver mudança de estado:
+   - Um comando MQTT é enviado
+6. Os dados são retornados ao frontend
+7. Os gráficos e estado são atualizados
+
 ---
- 
-## Observações Técnicas
- 
-**Parser de comandos:** o IoT Agent encapsula o comando no formato `sensor001@comando|sensor001@VALOR|`. O firmware usa `lastIndexOf('@')` para extrair o valor real, ignorando o encapsulamento duplo.
- 
-**Controle de estado:** o dashboard só publica um novo comando MQTT quando há mudança de estado ou tipo de anomalia, evitando inundar o broker.
- 
-**Subscrições STH-Comet:** a URL de notificação deve referenciar o nome do container Docker (`fiware-sth-comet`), não `localhost`, pois o Orion e o STH rodam em containers distintos na mesma rede Docker.
+
+## Melhorias Futuras
+
+- Implementação de detecção de anomalias com machine learning
+- Histórico persistente em banco de dados
+- Sistema de alertas (email, SMS, push)
+- Interface mais avançada com filtros de tempo
+- Controle manual via dashboard
+- Autenticação de usuários
+
+---
+
+## Observações
+
+- O sistema depende de um broker MQTT ativo
+- O endpoint FIWARE deve estar acessível
+- O estado é baseado apenas na última leitura recebida
