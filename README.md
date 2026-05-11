@@ -33,6 +33,9 @@ Arquivo principal: app.py
 
 ---
 
+## Arquitetura
+![Diagrama de Arquitetura](./img/arquiteture.jpg)
+
 ### 2. Frontend (Dashboard)
 Interface web que:
 - Exibe gráficos em tempo real
