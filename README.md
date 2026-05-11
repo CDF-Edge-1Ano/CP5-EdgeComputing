@@ -34,7 +34,7 @@ Arquivo principal: app.py
 ---
 
 ## Arquitetura
-![Diagrama de Arquitetura](./img/arquiteture.jpg)
+![Diagrama de Arquitetura](./arquitetura.jpeg)
 
 ### 2. Frontend (Dashboard)
 Interface web que:
